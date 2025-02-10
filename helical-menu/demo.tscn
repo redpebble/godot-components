@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxyy656gptq4h"]
+
+[ext_resource type="PackedScene" uid="uid://c86lus2y1utvr" path="res://helical_menu.tscn" id="1_gkkkl"]
+
+[node name="Demo" type="Node2D"]
+
+[node name="HelicalMenu" parent="." instance=ExtResource("1_gkkkl")]
+position = Vector2(500, 500)

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://brgbfjihjyjeh"]
+
+[ext_resource type="Script" path="res://helical_menu_item.gd" id="1_b4y0h"]
+[ext_resource type="Texture2D" uid="uid://1yus17she5wm" path="res://godot.png" id="2_4jhd4"]
+
+[node name="MenuItem" type="Node2D"]
+script = ExtResource("1_b4y0h")
+
+[node name="Content" type="Node2D" parent="."]
+
+[node name="Icon" type="Sprite2D" parent="Content"]
+modulate = Color(1, 1, 1, 0.388235)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_4jhd4")
