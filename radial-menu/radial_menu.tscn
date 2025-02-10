@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c86lus2y1utvr"]
+
+[ext_resource type="Script" path="res://radial_menu.gd" id="1_p38lr"]
+
+[node name="RadialMenu" type="Node2D"]
+script = ExtResource("1_p38lr")
