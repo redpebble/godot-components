@@ -1,7 +1,6 @@
 extends Node2D
 
-# TESTING
-var test_item_scene = preload("res://menu_item.tscn")
+signal item_selected(index: int, item: MenuItem)
 
 @export var num_slots: int = 12
 @export var menu_radius: float = 300
@@ -15,13 +14,9 @@ var test_item_scene = preload("res://menu_item.tscn")
 var item_list: Array[MenuItem] = []
 var slot_index: int = -1
 
-func _ready() -> void:
-	# TESTING
-	for i in num_slots:
-		var item = test_item_scene.instantiate() as MenuItem
-		item.get_icon().set_modulate(Color(randf(), randf(), randf()))
-		item_list.append(item)
-	instantiate()
+func set_item_list(list: Array[MenuItem]):
+	if list.size() > num_slots: list.resize(num_slots)
+	item_list = list
 
 func instantiate():
 	$Cursor/Sprite.position.y = -(menu_radius - (200 * item_scale_ratio))
@@ -49,7 +44,8 @@ func _process(delta: float) -> void:
 		$Cursor.rotation = input_angle - PI/2
 		input_angle = fposmod(input_angle - PI/2, 2*PI) # rotate coordinates so that 0 is "up"
 		highlight_nearest_slot(input_angle)
-		
+	
+	if Input.is_action_just_pressed("ui_select"): emit_item_selected()
 
 func get_nearest_slot_angle(angle: float) -> float: # this could be made more efficient
 	var min_diff = PI
@@ -82,6 +78,10 @@ func un_highlight_all():
 	slot_index = -1
 	for item in item_list:
 		item.set_highlight(false)
+
+func emit_item_selected():
+	if slot_index == -1 || slot_index >= item_list.size(): return
+	item_selected.emit(slot_index, item_list[slot_index])
 
 func angle_diff(a, b):
 	var d = abs(a - b)
