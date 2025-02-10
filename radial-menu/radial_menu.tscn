@@ -1,6 +1,12 @@
-[gd_scene load_steps=2 format=3 uid="uid://c86lus2y1utvr"]
+[gd_scene load_steps=3 format=3 uid="uid://c86lus2y1utvr"]
 
 [ext_resource type="Script" path="res://radial_menu.gd" id="1_p38lr"]
+[ext_resource type="Texture2D" uid="uid://b1yg351gu0afj" path="res://cursor.png" id="2_aqyxl"]
 
 [node name="RadialMenu" type="Node2D"]
 script = ExtResource("1_p38lr")
+
+[node name="Cursor" type="Node2D" parent="."]
+
+[node name="Sprite" type="Sprite2D" parent="Cursor"]
+texture = ExtResource("2_aqyxl")

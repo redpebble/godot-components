@@ -9,9 +9,10 @@ var test_item_scene = preload("res://helical_menu_item.tscn")
 @export var static_cursor: bool = false
 @export var loop_list: bool = false
 
-var item_list: Array[HelicalMenuItem] = []
-var index: int = 0
 var angle_interval = 2*PI / num_visible_items
+var item_list: Array[HelicalMenuItem] = []
+var item_index: int = 0
+var slot_index: int = 0
 
 func _ready() -> void:
 	for i in test_list_size:
@@ -38,26 +39,34 @@ func _process(delta: float) -> void:
 	input_angle = fposmod(input_angle - PI/2, 2*PI) # rotate coordinates so that 0 is "up"
 	if input_vector != Vector2.ZERO:
 		var angle = fposmod(nearest_select_angle_to(input_angle) + PI/2, 2*PI) # rotate back to original orientation
-		$TestCursor.rotation = angle - PI # convert back to original [-PI, PI] range
-
-var item = 0
+		$TestCursor.rotation = angle - PI # convert back to [-PI, PI]
 
 func nearest_select_angle_to(angle: float) -> float: # this could be made more efficient
-	var nearest_angle = 0
 	var min_diff = PI
-	var new_item = -1
+	var nearest_angle = 0
 	for i in num_visible_items:
-		var select_angle = i * angle_interval
-		var diff = angle_diff(angle, select_angle)
-		#if i == 10: print('%s %s %s'%[rad_to_deg(angle), rad_to_deg(select_angle), rad_to_deg(diff)])
+		var diff = angle_diff(angle, i * angle_interval)
 		if diff < min_diff:
 			min_diff = diff
-			nearest_angle = select_angle
-			new_item = i
-	if item != new_item:
-		item = new_item
-		print('%s: %s'%[item, nearest_angle/PI])
+			nearest_angle = i * angle_interval
 	return nearest_angle
+
+func select_nearest_slot(angle: float): # this could be made more efficient
+	var min_diff = PI
+	var index = -1
+	for i in num_visible_items:
+		var diff = angle_diff(angle, i * angle_interval)
+		if diff < min_diff:
+			min_diff = diff
+			index = i
+	if slot_index != index: select_slot(index)
+
+func select_slot(index: int):
+	if index >= num_visible_items: return
+	slot_index = index
+	for item in item_list:
+		item.get_content().position.y = -radius
+	# TODO
 
 func angle_diff(a, b):
 	var d = abs(a - b)
