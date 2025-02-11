@@ -1,9 +1,15 @@
 extends Node2D
 
-func _process(delta: float) -> void:
-	var input_vector = Input.get_vector('ui_left', 'ui_right', 'ui_up', 'ui_down')
-	if input_vector == Vector2.ZERO:
-		$TestCursor.hide()
-	else:
-		$TestCursor.show()
-		$TestCursor.rotation = input_vector.angle()
+var test_item_scene = preload("res://menu_item.tscn")
+
+func _ready() -> void:
+	var item_list: Array[MenuItem] = []
+	for i in $HelicalMenu.num_slots:
+		var item = test_item_scene.instantiate() as MenuItem
+		item.get_icon().set_modulate(Color(randf(), randf(), randf()))
+		item_list.append(item)
+	$HelicalMenu.set_item_list(item_list)
+	$HelicalMenu.instantiate()
+
+func _on_helical_menu_item_selected(index: int, _item: MenuItem) -> void:
+	print('item selected: %s'%[index])
