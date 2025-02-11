@@ -10,7 +10,6 @@ visible_items = null
 menu_radius = null
 item_scale_ratio = null
 static_cursor = null
-maintain_highlight = null
 wrap_item_list = null
 
 [node name="Cursor" type="Node2D" parent="."]

@@ -12,8 +12,6 @@ signal item_selected(slot_index: int, item: MenuItem)
 @export var item_scale_ratio: float = 1
 ## Rotate the menu instead of the cursor.
 @export var static_cursor: bool = false
-## When no input is detected, maintain the last highlighted item. When [member static_cursor] is enabled, this is always true.
-@export var maintain_highlight: bool = false
 ## Wrap the item list so that the last item is next to the first.
 @export var wrap_item_list: bool = false
 
@@ -47,7 +45,6 @@ func instantiate():
 	_update_items()
 	_update_cursor()
 
-var last = 0
 func _process(_delta: float) -> void:
 	var input_vector = Input.get_vector('ui_left', 'ui_right', 'ui_up', 'ui_down')
 	var input_angle = _calc_input_angle(input_vector)
@@ -62,7 +59,7 @@ func _process(_delta: float) -> void:
 func _highlight_with_radial_cursor(input_vector: Vector2):
 	if input_vector == Vector2.ZERO:
 		if !_is_rotating: return
-		_cursor_rotation = _get_nearest_slot_angle(_cursor_rotation)
+		_cursor_rotation = _calc_slot_angle(_calc_nearest_slot_index(_cursor_rotation))
 		_update_cursor()
 		_saved_offset = _cursor_rotation
 		_is_rotating = false
@@ -70,7 +67,7 @@ func _highlight_with_radial_cursor(input_vector: Vector2):
 
 	if !wrap_item_list:
 		if (_item_index == 0 && _input_direction < 0) || (_item_index == _item_list.size()-1 && _input_direction > 0):
-			_cursor_rotation = _angle_interval * _slot_index
+			_cursor_rotation = _calc_slot_angle(_slot_index)
 			_update_cursor()
 			_saved_offset = _cursor_rotation
 			_is_rotating = false
@@ -86,16 +83,24 @@ func _highlight_with_radial_cursor(input_vector: Vector2):
 	_cursor_rotation = input_angle
 	_update_cursor()
 	
-	_highlight_nearest_slot(input_angle)
+	_highlight_slot(_calc_nearest_slot_index(input_angle))
 
 func _highlight_with_static_cursor(input_vector: Vector2):
 	if input_vector == Vector2.ZERO:
 		if !_is_rotating: return
-		_menu_rotation = _get_nearest_slot_angle(_menu_rotation)
+		_menu_rotation = _calc_slot_angle(_calc_nearest_slot_index(_menu_rotation))
 		_update_items()
 		_saved_offset = _menu_rotation
 		_is_rotating = false
 		return
+
+	if !wrap_item_list:
+		if (_item_index == 0 && _input_direction > 0) || (_item_index == _item_list.size()-1 && _input_direction < 0):
+			_menu_rotation = _calc_slot_angle(_slot_index)
+			_update_items()
+			_saved_offset = _menu_rotation
+			_is_rotating = false
+			return
 
 	var input_angle = _calc_input_angle(input_vector)
 	if !_is_rotating:
@@ -107,7 +112,7 @@ func _highlight_with_static_cursor(input_vector: Vector2):
 	_menu_rotation = input_angle
 	_update_items()
 
-	_highlight_nearest_slot(-input_angle)
+	_highlight_slot(_calc_nearest_slot_index(-input_angle))
 
 func _update_items():
 	_visible_list.clear()
@@ -138,16 +143,11 @@ func _update_items():
 	
 	_set_highlight()
 
-func _hide_item(item_index):
-	if item_index < 0 || item_index >= _item_list.size(): return
-	var item = _item_list[item_index]
-	item.hide()
-
 func _update_item(item_index, slot_index, d_radius = 0, d_scale = 0, d_alpha = 0):
 	if item_index < 0 || item_index >= _item_list.size(): return
 	var item = _item_list[item_index]
 	item.show()
-	var angle = _angle_interval * slot_index + _menu_rotation
+	var angle = _calc_slot_angle(slot_index) + _menu_rotation
 	item.rotation = angle
 	item.get_content().rotation = -angle
 	item.get_content().position.y = -menu_radius - d_radius
@@ -155,31 +155,24 @@ func _update_item(item_index, slot_index, d_radius = 0, d_scale = 0, d_alpha = 0
 	item.get_icon().modulate.a = 1 - d_alpha
 	_visible_list.append(item_index)
 
+func _hide_item(item_index):
+	if item_index < 0 || item_index >= _item_list.size(): return
+	var item = _item_list[item_index]
+	item.hide()
+
 func _update_cursor():
 	$Cursor.rotation = _cursor_rotation
 
-func _highlight_nearest_slot(angle: float): # this could be made more efficient
+func _calc_nearest_slot_index(angle: float): # this could be made more efficient
 	angle = _normalize_angle(angle)
 	var min_diff = PI
 	var index = -1
 	for i in slots:
-		var diff = _calc_angle_diff(angle, i * _angle_interval)
+		var diff = _calc_angle_diff(angle, _calc_slot_angle(i))
 		if diff < min_diff:
 			min_diff = diff
 			index = i
-	if _slot_index != index:
-		_highlight_slot(index)
-
-func _get_nearest_slot_angle(angle: float) -> float: # this could be made more efficient
-	angle = _normalize_angle(angle)
-	var min_diff = PI
-	var nearest_angle = 0
-	for i in slots:
-		var diff = _calc_angle_diff(angle, i * _angle_interval)
-		if diff < min_diff:
-			min_diff = diff
-			nearest_angle = i * _angle_interval
-	return nearest_angle
+	return index
 
 func _highlight_slot(new_slot_index: int):
 	if new_slot_index >= slots: return
@@ -189,7 +182,7 @@ func _highlight_slot(new_slot_index: int):
 		if new_item_index < 0 || new_item_index >= _item_list.size():
 			return
 	else:
-		new_item_index = posmod(_item_index, _item_list.size())
+		new_item_index = posmod(new_item_index, _item_list.size())
 	_item_index = new_item_index
 	_slot_index = new_slot_index
 	_highlight_index = _item_index
@@ -228,3 +221,6 @@ func _calc_rotation_vector(a, b, max_n):
 
 func _calc_angle_diff(a, b):
 	return abs(_calc_rotation_vector(a, b, 2*PI))
+
+func _calc_slot_angle(slot_index):
+	return _angle_interval * slot_index
