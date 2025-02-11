@@ -4,7 +4,7 @@ var test_item_scene = preload("res://menu_item.tscn")
 
 func _ready() -> void:
 	var item_list: Array[MenuItem] = []
-	for i in 1000:
+	for i in 40:
 		var item = test_item_scene.instantiate() as MenuItem
 		item.get_icon().set_modulate(Color(randf(), randf(), randf()))
 		item.get_label().text = str(i)
