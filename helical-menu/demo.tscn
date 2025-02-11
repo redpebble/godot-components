@@ -8,6 +8,8 @@ script = ExtResource("1_43kma")
 
 [node name="HelicalMenu" parent="." instance=ExtResource("1_gkkkl")]
 position = Vector2(500, 500)
-item_scale_ratio = 0.4
+num_slots = 15
+menu_radius = 200.0
+item_scale_ratio = 0.25
 
 [connection signal="item_selected" from="HelicalMenu" to="." method="_on_helical_menu_item_selected"]

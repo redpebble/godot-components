@@ -2,13 +2,13 @@ extends Node2D
 
 signal item_selected(index: int, item: MenuItem)
 
-## The number of visible slots on the helical menu
-@export_custom(PROPERTY_HINT_NONE, "suffix:slots") var num_slots: int = 12
-## The base radius of the helical menu, in pixels
+## The number of visible slots on the helical menu. Should be an odd number for ideal spacing.
+@export_custom(PROPERTY_HINT_NONE, "suffix:slots") var num_slots: int = 11
+## The base radius of the helical menu, in pixels.
 @export_custom(PROPERTY_HINT_NONE, "suffix:px") var menu_radius: float = 300
-## The scaling ratio of the menu items
+## The scaling ratio of the menu items.
 @export var item_scale_ratio: float = 1
-## Rotate the menu instead of the cursor
+## Rotate the menu instead of the cursor.
 @export var static_cursor: bool = false
 ## When no input is detected, maintain the last highlighted item. When [member static_cursor] is enabled, this is always true.
 @export var maintain_highlight: bool = false
@@ -17,7 +17,7 @@ signal item_selected(index: int, item: MenuItem)
 @onready var _item_scale = Vector2(item_scale_ratio, item_scale_ratio)
 
 var _item_list: Array[MenuItem] = []
-var _slot_index: int = -1
+var _slot_index: int = 0
 
 # static cursor mode
 var _is_rotating = false
@@ -88,6 +88,30 @@ func _update_items():
 		content.position.y = -menu_radius # so 0th item is "up"
 		content.rotation = -angle
 		content.scale = _item_scale
+	
+	var idx_up = _slot_index + 1
+	var idx_down = _slot_index - 1
+	var n = floor((num_slots - 1) / 2.0)
+	for i in n:
+		if idx_up >= num_slots: idx_up = 0
+		if idx_down < 0: idx_down = num_slots - 1
+
+		var radius_diff = 0.4 * menu_radius / n * (i+1)
+		_item_list[idx_up].get_content().position.y = (-menu_radius) - radius_diff
+		_item_list[idx_down].get_content().position.y = (-menu_radius) + radius_diff
+		
+		var scale_up = _item_scale * pow(1.08, i+1)
+		_item_list[idx_up].get_content().scale = scale_up
+
+		var scale_down = _item_scale * pow(0.92, i+1)
+		_item_list[idx_down].get_content().scale = scale_down
+
+		var alpha = 1 - (1/(n-0.5) * i)
+		_item_list[idx_up].get_icon().modulate.a = alpha
+		_item_list[idx_down].get_icon().modulate.a = alpha
+		
+		idx_up += 1
+		idx_down -= 1
 
 func _highlight_nearest_slot(angle: float): # this could be made more efficient
 	angle = _normalize_angle(angle)
@@ -115,11 +139,11 @@ func _highlight_slot(index: int):
 	_un_highlight_all()
 	if index >= num_slots: return
 	_slot_index = index
+	_update_items()
 	if index >= _item_list.size(): return
 	_item_list[index].set_highlight(true)
 
 func _un_highlight_all():
-	_slot_index = -1
 	for item in _item_list:
 		item.set_highlight(false)
 
