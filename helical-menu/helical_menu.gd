@@ -21,7 +21,6 @@ signal item_selected(slot_index: int, item: MenuItem)
 var _item_list: Array[MenuItem] = []
 var _item_index: int = 0
 var _slot_index: int = 0
-var _highlight_index: int = -1
 
 var _visible_list = []
 var _is_rotating = false
@@ -49,57 +48,21 @@ func _process(_delta: float) -> void:
 	var input_angle = _calc_input_angle(input_vector)
 	_input_direction = _calc_rotation_direction(input_angle, _last_input_angle, PI)
 	_last_input_angle = input_angle
-	if static_cursor: _highlight_with_static_cursor(input_vector)
-	else: _highlight_with_radial_cursor(input_vector)
+
+	_update_menu(input_vector)
 
 	if Input.is_action_just_pressed("ui_select"):
 		_emit_item_selected()
 
-func _highlight_with_radial_cursor(input_vector: Vector2):
-	if input_vector == Vector2.ZERO:
+func _update_menu(input_vector: Vector2):
+	if input_vector == Vector2.ZERO || _at_list_edge():
 		if !_is_rotating: return
 		_current_rotation = _calc_slot_angle(_calc_nearest_slot_index(_current_rotation))
-		_update_cursor()
 		_saved_offset = _current_rotation
 		_is_rotating = false
-		return
-
-	if !wrap_item_list:
-		if (_item_index == 0 && _input_direction < 0) || (_item_index == _item_list.size()-1 && _input_direction > 0):
-			_current_rotation = _calc_slot_angle(_slot_index)
-			_update_cursor()
-			_saved_offset = _current_rotation
-			_is_rotating = false
-			return
-
-	var input_angle = _calc_input_angle(input_vector)
-	if !_is_rotating:
-		_input_offset = input_angle
-		_is_rotating = true
-	input_angle -= _input_offset
-	input_angle += _saved_offset
-	
-	_current_rotation = input_angle
-	_update_cursor()
-	
-	_highlight_slot(_calc_nearest_slot_index(input_angle))
-
-func _highlight_with_static_cursor(input_vector: Vector2):
-	if input_vector == Vector2.ZERO:
-		if !_is_rotating: return
-		_current_rotation = _calc_slot_angle(_calc_nearest_slot_index(_current_rotation))
 		_update_items()
-		_saved_offset = _current_rotation
-		_is_rotating = false
+		_update_cursor()
 		return
-
-	if !wrap_item_list:
-		if (_item_index == 0 && _input_direction > 0) || (_item_index == _item_list.size()-1 && _input_direction < 0):
-			_current_rotation = -_calc_slot_angle(_slot_index)
-			_update_items()
-			_saved_offset = _current_rotation
-			_is_rotating = false
-			return
 
 	var input_angle = _calc_input_angle(input_vector)
 	if !_is_rotating:
@@ -107,11 +70,24 @@ func _highlight_with_static_cursor(input_vector: Vector2):
 		_is_rotating = true
 	input_angle -= _input_offset
 	input_angle += _saved_offset
-
+	
 	_current_rotation = input_angle
 	_update_items()
+	_update_cursor()
+	
+	var slot_angle = -input_angle if static_cursor else input_angle
+	_highlight_slot(_calc_nearest_slot_index(slot_angle))
 
-	_highlight_slot(_calc_nearest_slot_index(-input_angle))
+func _at_list_edge() -> bool:
+	if wrap_item_list: return false
+	if _input_direction == 0: return false
+	if static_cursor:
+		if _input_direction > 0 && _item_index > 0: return false
+		if _input_direction < 0 && _item_index < _item_list.size()-1: return false
+	else:
+		if _input_direction < 0 && _item_index > 0: return false
+		if _input_direction > 0 && _item_index < _item_list.size()-1: return false
+	return true
 
 func _update_items():
 	_visible_list.clear()
@@ -161,6 +137,7 @@ func _hide_item(item_index):
 	item.hide()
 
 func _update_cursor():
+	if static_cursor: return
 	$Cursor.rotation = _current_rotation
 
 func _calc_nearest_slot_index(angle: float): # this could be made more efficient
@@ -185,18 +162,17 @@ func _highlight_slot(new_slot_index: int):
 		new_item_index = posmod(new_item_index, _item_list.size())
 	_item_index = new_item_index
 	_slot_index = new_slot_index
-	_highlight_index = _item_index
 	_update_items()
 
 func _set_highlight():
 	for item in _item_list:
 		item.set_highlight(false)
-	if _highlight_index < 0 || _highlight_index >= _item_list.size(): return
-	_item_list[_highlight_index].set_highlight(true)
+	if _item_index < 0 || _item_index >= _item_list.size(): return
+	_item_list[_item_index].set_highlight(true)
 
 func _emit_item_selected():
-	if _highlight_index < 0 || _highlight_index >= _item_list.size(): return
-	item_selected.emit(_slot_index, _item_list[_highlight_index])
+	if _item_index < 0 || _item_index >= _item_list.size(): return
+	item_selected.emit(_slot_index, _item_list[_item_index])
 
 func _normalize_angle(angle: float):
 	return fposmod(angle, 2*PI) # convert the coordinates to [0, 2PI]
