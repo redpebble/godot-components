@@ -31,6 +31,8 @@ var _input_offset = 0
 var _last_input_angle = 0
 var _input_direction = 0
 
+var _delta = 0
+
 func set_item_list(list: Array[MenuItem]):
 	_item_list = list
 
@@ -39,11 +41,14 @@ func instantiate():
 	$Cursor/Sprite.scale = _item_scale
 
 	for item in _item_list:
+		item.hide()
 		call_deferred('add_child', item)
 	_update_items()
 	_update_cursor()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_delta = delta
+
 	var input_vector = Input.get_vector('ui_left', 'ui_right', 'ui_up', 'ui_down')
 	var input_angle = _calc_input_angle(input_vector)
 	_input_direction = _calc_rotation_direction(input_angle, _last_input_angle, PI)
@@ -56,7 +61,6 @@ func _process(_delta: float) -> void:
 
 func _update_menu(input_vector: Vector2):
 	if input_vector == Vector2.ZERO || _at_list_edge():
-		if !_is_rotating: return
 		_current_rotation = _calc_slot_angle(_calc_nearest_slot_index(_current_rotation))
 		_saved_offset = _current_rotation
 		_is_rotating = false
@@ -70,11 +74,11 @@ func _update_menu(input_vector: Vector2):
 		_is_rotating = true
 	input_angle -= _input_offset
 	input_angle += _saved_offset
-	
+
 	_current_rotation = input_angle
 	_update_items()
 	_update_cursor()
-	
+
 	var slot_angle = -input_angle if static_cursor else input_angle
 	_highlight_slot(_calc_nearest_slot_index(slot_angle))
 
@@ -96,40 +100,47 @@ func _update_items():
 
 	var idx_up = _item_index + 1
 	var idx_down = _item_index - 1
-	for i: int in visible_items:
+	for i: int in visible_items + 1:
 		if wrap_item_list:
 			if idx_up >= _item_list.size(): idx_up = 0
 			if idx_down < 0: idx_down = _item_list.size() - 1
 
-		var d_radius = 0.5 * menu_radius / visible_items * (i+1)
-		var d_scale = 0.1 * (i+1)
-		var d_alpha = 1.0/(visible_items + 0.5) * (i+1)
+		var d_radius = 0.7 * menu_radius / visible_items * (i+1)
+		var d_scale = 1.0/(visible_items + 0.5) * (i+1)
+		var d_alpha = d_scale
 
 		if idx_up < _item_list.size():
-			_update_item(idx_up, (_slot_index + (i+1)) % slots, d_radius, d_scale, d_alpha)
+			_update_item(idx_up, (_slot_index + (i+1)) % slots, d_radius * (1+i/20.0), d_scale, d_alpha)
 		if idx_down >= 0:
 			_update_item(idx_down, (_slot_index - (i+1)) % slots, -d_radius, -d_scale, d_alpha)
 
 		idx_up += 1
 		idx_down -= 1
-	
+
 	for i in _item_list.size():
 		if !_visible_list.has(i): _hide_item(i)
-	
+
 	_set_highlight()
 
 func _update_item(item_index, slot_index, d_radius = 0, d_scale = 0, d_alpha = 0):
 	if item_index < 0 || item_index >= _item_list.size(): return
 	var item = _item_list[item_index]
-	item.show()
 	var angle = _calc_slot_angle(slot_index)
 	if static_cursor: angle += _current_rotation
-	item.rotation = angle
-	item.get_content().rotation = -angle
-	item.get_content().position.y = -menu_radius - d_radius
-	item.get_content().scale = _item_scale * (1 + d_scale)
-	item.get_icon().modulate.a = 1 - d_alpha
+	if !item.visible:
+		item.rotation = angle
+		item.get_content().rotation = -angle
+		item.get_content().position.y = -menu_radius - d_radius
+		item.get_content().scale = _item_scale * (1 + d_scale)
+		item.get_content().modulate.a = 1 - d_alpha
+	else:
+		item.rotation = lerp_angle(item.rotation, angle, _delta * 10)
+		item.get_content().rotation = lerp_angle(item.get_content().rotation, -angle, _delta * 10)
+		item.get_content().position.y = lerpf(item.get_content().position.y, -menu_radius - d_radius, _delta * 8)
+		item.get_content().scale = lerp(item.get_content().scale, _item_scale * (1 + d_scale), _delta * 10)
+		item.get_content().modulate.a = lerpf(item.get_content().modulate.a, 1 - d_alpha, _delta * 5)
 	_visible_list.append(item_index)
+	item.show()
 
 func _hide_item(item_index):
 	if item_index < 0 || item_index >= _item_list.size(): return
