@@ -5,6 +5,11 @@
 
 [node name="HelicalMenu" type="Node2D"]
 script = ExtResource("1_p38lr")
+num_slots = null
+menu_radius = null
+item_scale_ratio = null
+static_cursor = null
+maintain_highlight = null
 
 [node name="Cursor" type="Node2D" parent="."]
 

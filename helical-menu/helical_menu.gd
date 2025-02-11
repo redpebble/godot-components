@@ -82,13 +82,12 @@ func _update_items():
 	for i in num_slots:
 		if i >= _item_list.size(): return
 		var item = _item_list[i]
-		var content = item.get_content()
 		var angle = _angle_interval * i + _current_rotation
 		item.rotation = angle
-		content.position.y = -menu_radius # so 0th item is "up"
-		content.rotation = -angle
-		content.scale = _item_scale
+		item.get_content().rotation = -angle
 	
+	_update_item_transform(_slot_index)
+
 	var idx_up = _slot_index + 1
 	var idx_down = _slot_index - 1
 	var n = floor((num_slots - 1) / 2.0)
@@ -96,22 +95,21 @@ func _update_items():
 		if idx_up >= num_slots: idx_up = 0
 		if idx_down < 0: idx_down = num_slots - 1
 
-		var radius_diff = 0.4 * menu_radius / n * (i+1)
-		_item_list[idx_up].get_content().position.y = (-menu_radius) - radius_diff
-		_item_list[idx_down].get_content().position.y = (-menu_radius) + radius_diff
-		
-		var scale_up = _item_scale * pow(1.08, i+1)
-		_item_list[idx_up].get_content().scale = scale_up
+		var d_radius = 0.5 * menu_radius / n * (i+1)
+		var d_scale = .1 * (i+1)
+		var d_alpha = 1/(n-0.5) * i
 
-		var scale_down = _item_scale * pow(0.92, i+1)
-		_item_list[idx_down].get_content().scale = scale_down
+		_update_item_transform(idx_up, d_radius, d_scale, d_alpha)
+		_update_item_transform(idx_down, -d_radius, -d_scale, d_alpha)
 
-		var alpha = 1 - (1/(n-0.5) * i)
-		_item_list[idx_up].get_icon().modulate.a = alpha
-		_item_list[idx_down].get_icon().modulate.a = alpha
-		
 		idx_up += 1
 		idx_down -= 1
+
+func _update_item_transform(index, d_radius = 0, d_scale = 0, d_alpha = 0):
+	var item = _item_list[index]
+	item.get_content().position.y = -menu_radius - d_radius
+	item.get_content().scale = _item_scale * (1 + d_scale)
+	item.get_icon().modulate.a = 1 - d_alpha
 
 func _highlight_nearest_slot(angle: float): # this could be made more efficient
 	angle = _normalize_angle(angle)

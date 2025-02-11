@@ -11,5 +11,7 @@ position = Vector2(500, 500)
 num_slots = 15
 menu_radius = 200.0
 item_scale_ratio = 0.25
+static_cursor = null
+maintain_highlight = null
 
 [connection signal="item_selected" from="HelicalMenu" to="." method="_on_helical_menu_item_selected"]
