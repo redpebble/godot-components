@@ -9,6 +9,5 @@ script = ExtResource("1_43kma")
 [node name="RadialMenu" parent="." instance=ExtResource("1_gkkkl")]
 position = Vector2(500, 500)
 item_scale_ratio = 0.4
-static_cursor = true
 
 [connection signal="item_selected" from="RadialMenu" to="." method="_on_radial_menu_item_selected"]

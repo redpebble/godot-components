@@ -1,0 +1,3 @@
+[gd_scene format=3 uid="uid://bsgb3gebrwid1"]
+
+[node name="WaterPlane" type="MeshInstance3D"]

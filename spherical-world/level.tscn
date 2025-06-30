@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://yvqpfa64keh7"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_5xgho"]
+radius = 20.0
+
+[node name="Level" type="Node3D"]
+
+[node name="Planet" type="RigidBody3D" parent="."]
+gravity_scale = 0.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Planet"]
+shape = SubResource("SphereShape3D_5xgho")
+debug_color = Color(0, 0.6, 0.701961, 1)
