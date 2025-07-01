@@ -1,0 +1,65 @@
+[gd_resource type="ShaderMaterial" load_steps=9 format=3 uid="uid://ciyhcvyhv2p4f"]
+
+[ext_resource type="Shader" uid="uid://dgpwy5t5k87f1" path="res://shaders/Water.gdshader" id="1_uu7js"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_occse"]
+blend_mode = 3
+cull_mode = 2
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_h4ur2"]
+noise_type = 4
+frequency = 0.0034
+offset = Vector3(593.95, 87.15, 0)
+fractal_type = 2
+fractal_weighted_strength = 0.36
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_h4ur2"]
+seamless = true
+seamless_blend_skirt = 0.77
+as_normal_map = true
+noise = SubResource("FastNoiseLite_h4ur2")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_occse"]
+noise_type = 4
+seed = 10
+frequency = 0.0028
+offset = Vector3(518.7, 489.95, 0)
+fractal_type = 2
+fractal_gain = 0.435
+fractal_weighted_strength = 0.6
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_rp0r2"]
+seamless = true
+seamless_blend_skirt = 0.776
+as_normal_map = true
+noise = SubResource("FastNoiseLite_occse")
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_rp0r2"]
+noise_type = 3
+fractal_gain = 0.085
+fractal_weighted_strength = 0.7
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_cl5xf"]
+seamless = true
+noise = SubResource("FastNoiseLite_rp0r2")
+
+[resource]
+render_priority = 0
+next_pass = SubResource("StandardMaterial3D_occse")
+shader = ExtResource("1_uu7js")
+shader_parameter/albedo = Color(0.658221, 0.00222441, 0.871397, 1)
+shader_parameter/fresnel_albedo = Color(0.658824, 0.00392157, 0.870588, 1)
+shader_parameter/metallic = 0.0
+shader_parameter/roughness = 0.5
+shader_parameter/texture_normal1 = SubResource("NoiseTexture2D_h4ur2")
+shader_parameter/texture_normal2 = SubResource("NoiseTexture2D_rp0r2")
+shader_parameter/wave_direction1 = Vector2(2, 1)
+shader_parameter/wave_direction2 = Vector2(3, 2)
+shader_parameter/time_scale = 0.025
+shader_parameter/wave = SubResource("NoiseTexture2D_cl5xf")
+shader_parameter/noise_scale = 8.0
+shader_parameter/height_scale = 0.1
+shader_parameter/color_deep = Color(0, 0, 0, 1)
+shader_parameter/color_shallow = Color(1, 1, 1, 1)
+shader_parameter/beers_law = 7.0
+shader_parameter/depth_offset = 0.0

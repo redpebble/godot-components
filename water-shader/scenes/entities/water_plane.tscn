@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://bsgb3gebrwid1"]
 
-[ext_resource type="Material" uid="uid://bkf7cp7bm8ol1" path="res://resources/fold.tres" id="1_evp2s"]
+[ext_resource type="Material" uid="uid://ciyhcvyhv2p4f" path="res://resources/fold_purple.tres" id="1_12svh"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_p2yne"]
 lightmap_size_hint = Vector2i(52, 52)
@@ -11,4 +11,4 @@ orientation = 1
 
 [node name="WaterPlane" type="MeshInstance3D"]
 mesh = SubResource("QuadMesh_p2yne")
-surface_material_override/0 = ExtResource("1_evp2s")
+surface_material_override/0 = ExtResource("1_12svh")
