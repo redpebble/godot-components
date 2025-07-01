@@ -1,8 +1,9 @@
 [gd_scene load_steps=3 format=3 uid="uid://bsgb3gebrwid1"]
 
-[ext_resource type="Material" uid="uid://casy1p3y4sbqi" path="res://shaders/Water.tres" id="1_evp2s"]
+[ext_resource type="Material" uid="uid://bkf7cp7bm8ol1" path="res://resources/fold.tres" id="1_evp2s"]
 
 [sub_resource type="QuadMesh" id="QuadMesh_p2yne"]
+lightmap_size_hint = Vector2i(52, 52)
 size = Vector2(10, 10)
 subdivide_width = 200
 subdivide_depth = 200

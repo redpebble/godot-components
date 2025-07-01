@@ -1,0 +1,43 @@
+[gd_scene load_steps=7 format=3 uid="uid://tbnpg0ym02v6"]
+
+[ext_resource type="PackedScene" uid="uid://bsgb3gebrwid1" path="res://scenes/entities/water_plane.tscn" id="1_fpdas"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_5hauk"]
+sky_top_color = Color(1, 1, 1, 1)
+sky_horizon_color = Color(0.666537, 0.675763, 0.69033, 1)
+ground_bottom_color = Color(0, 0, 0, 1)
+sun_angle_max = 0.0
+
+[sub_resource type="Sky" id="Sky_lajc7"]
+sky_material = SubResource("ProceduralSkyMaterial_5hauk")
+
+[sub_resource type="Environment" id="Environment_xkm8s"]
+background_mode = 2
+sky = SubResource("Sky_lajc7")
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0, 0, 0, 1)
+fog_density = 1.0
+fog_aerial_perspective = 1.0
+fog_depth_begin = 0.0
+fog_depth_end = 20.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1j1lv"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_fpdas"]
+material = SubResource("StandardMaterial3D_1j1lv")
+
+[node name="Map" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_xkm8s")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-1, 8.74228e-08, 3.82137e-15, 0, -4.37114e-08, 1, 8.74228e-08, 1, 4.37114e-08, 0, 0, 0)
+light_bake_mode = 1
+shadow_opacity = 0.97
+
+[node name="WaterPlane" parent="." instance=ExtResource("1_fpdas")]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("CapsuleMesh_fpdas")
